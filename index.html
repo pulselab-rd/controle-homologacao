@@ -1187,6 +1187,74 @@
         <label>FICHA TÉCNICA</label>
         <textarea class="form-input" rows="4" id="e_ficha" style="resize:vertical"></textarea>
       </div>
+      <!-- REDES DE FARMÁCIA — só aparece se o equipamento for da aba farmácia -->
+      <div id="e_redes_wrap" style="display:none;grid-column:1/-1;">
+        <label style="font-size:11px;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">REDES DE FARMÁCIA</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;">
+
+          <!-- RAIA -->
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <input type="checkbox" id="e_check_raia" style="width:16px;height:16px;accent-color:var(--g1);cursor:pointer;">
+              <label for="e_check_raia" style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">🏪 Raia</label>
+            </div>
+            <div id="e_raia_wrap" style="display:none;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                  <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">ENTRADA</label>
+                  <input class="form-input" type="date" id="e_data_raia_entrada" style="margin-top:4px;">
+                </div>
+                <div>
+                  <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">SAÍDA</label>
+                  <input class="form-input" type="date" id="e_data_raia_saida" style="margin-top:4px;">
+                </div>
+              </div>
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                  <input type="checkbox" id="e_check_java_raia" style="width:14px;height:14px;accent-color:var(--g1);cursor:pointer;">
+                  <label for="e_check_java_raia" style="font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;">☕ Java</label>
+                </div>
+                <div id="e_java_raia_wrap" style="display:none;">
+                  <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">NÚMERO JAVA</label>
+                  <input class="form-input" type="text" id="e_java_raia_numero" placeholder="Ex: 12345" style="margin-top:4px;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DROGASIL -->
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+              <input type="checkbox" id="e_check_drogasil" style="width:16px;height:16px;accent-color:var(--g1);cursor:pointer;">
+              <label for="e_check_drogasil" style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">🏪 Drogasil</label>
+            </div>
+            <div id="e_drogasil_wrap" style="display:none;">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                <div>
+                  <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">ENTRADA</label>
+                  <input class="form-input" type="date" id="e_data_drogasil_entrada" style="margin-top:4px;">
+                </div>
+                <div>
+                  <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">SAÍDA</label>
+                  <input class="form-input" type="date" id="e_data_drogasil_saida" style="margin-top:4px;">
+                </div>
+              </div>
+              <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                  <input type="checkbox" id="e_check_java_drogasil" style="width:14px;height:14px;accent-color:var(--g1);cursor:pointer;">
+                  <label for="e_check_java_drogasil" style="font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;">☕ Java</label>
+                </div>
+                <div id="e_java_drogasil_wrap" style="display:none;">
+                  <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">NÚMERO JAVA</label>
+                  <input class="form-input" type="text" id="e_java_drogasil_numero" placeholder="Ex: 12345" style="margin-top:4px;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <div class="form-group" style="grid-column:1/-1">
         <label>IMAGEM DO EQUIPAMENTO</label>
         <div class="img-upload-area" id="e_img_area">
@@ -2420,6 +2488,76 @@ function abrirEdicao(id) {
   document.getElementById('e_data').value = eq.data && eq.data !== '—' ? eq.data : '';
   document.getElementById('e_categoria').value = eq.categoria;
   document.getElementById('e_ficha').value = eq.ficha;
+  // Mostrar redes de farmácia só se o equipamento for da aba farmácia
+  const eRedesWrap = document.getElementById('e_redes_wrap');
+  if(eRedesWrap) {
+    const isFarmacia = (equipStatus[eq.id] === 'farmacia' || equipStatus[String(eq.id)] === 'farmacia');
+    eRedesWrap.style.display = isFarmacia ? 'block' : 'none';
+
+    if(isFarmacia) {
+      // Bind checkbox events
+      ['raia','drogasil'].forEach(rede => {
+        const cb = document.getElementById('e_check_' + rede);
+        if(!cb) return;
+        cb.removeEventListener('change', cb._handler);
+        cb._handler = function() {
+          const wrap = document.getElementById('e_' + rede + '_wrap');
+          if(wrap) wrap.style.display = this.checked ? 'block' : 'none';
+        };
+        cb.addEventListener('change', cb._handler);
+
+        const jcb = document.getElementById('e_check_java_' + rede);
+        if(!jcb) return;
+        jcb.removeEventListener('change', jcb._handler);
+        jcb._handler = function() {
+          const jw = document.getElementById('e_java_' + rede + '_wrap');
+          if(jw) jw.style.display = this.checked ? 'block' : 'none';
+        };
+        jcb.addEventListener('change', jcb._handler);
+      });
+
+      // Populate Raia
+      const chkRaia = document.getElementById('e_check_raia');
+      if(chkRaia) {
+        chkRaia.checked = eq.raia || false;
+        const rw = document.getElementById('e_raia_wrap');
+        if(rw) rw.style.display = eq.raia ? 'block' : 'none';
+        const re = document.getElementById('e_data_raia_entrada');
+        const rs = document.getElementById('e_data_raia_saida');
+        if(re) re.value = eq.dataRaiaEntrada && eq.dataRaiaEntrada !== '—' ? eq.dataRaiaEntrada : '';
+        if(rs) rs.value = eq.dataRaiaSaida && eq.dataRaiaSaida !== '—' ? eq.dataRaiaSaida : '';
+        const jcbR = document.getElementById('e_check_java_raia');
+        if(jcbR) {
+          jcbR.checked = eq.javaRaia || false;
+          const jwr = document.getElementById('e_java_raia_wrap');
+          if(jwr) jwr.style.display = eq.javaRaia ? 'block' : 'none';
+          const jnr = document.getElementById('e_java_raia_numero');
+          if(jnr) jnr.value = eq.javaRaiaNumero && eq.javaRaiaNumero !== '—' ? eq.javaRaiaNumero : '';
+        }
+      }
+
+      // Populate Drogasil
+      const chkDrog = document.getElementById('e_check_drogasil');
+      if(chkDrog) {
+        chkDrog.checked = eq.drogasil || false;
+        const dw = document.getElementById('e_drogasil_wrap');
+        if(dw) dw.style.display = eq.drogasil ? 'block' : 'none';
+        const de = document.getElementById('e_data_drogasil_entrada');
+        const ds = document.getElementById('e_data_drogasil_saida');
+        if(de) de.value = eq.dataDrogasilEntrada && eq.dataDrogasilEntrada !== '—' ? eq.dataDrogasilEntrada : '';
+        if(ds) ds.value = eq.dataDrogasilSaida && eq.dataDrogasilSaida !== '—' ? eq.dataDrogasilSaida : '';
+        const jcbD = document.getElementById('e_check_java_drogasil');
+        if(jcbD) {
+          jcbD.checked = eq.javaDrogasil || false;
+          const jwd = document.getElementById('e_java_drogasil_wrap');
+          if(jwd) jwd.style.display = eq.javaDrogasil ? 'block' : 'none';
+          const jnd = document.getElementById('e_java_drogasil_numero');
+          if(jnd) jnd.value = eq.javaDrogasilNumero && eq.javaDrogasilNumero !== '—' ? eq.javaDrogasilNumero : '';
+        }
+      }
+    }
+  }
+
   // Load existing image into edit preview
   e_imgBase64 = eq.imagem || null;
   const ep = document.getElementById('e_img_preview');
@@ -2451,16 +2589,16 @@ function salvarEdicao() {
     categoria,
     ficha: document.getElementById('e_ficha').value.trim(),
     imagem: e_imgBase64 !== undefined ? e_imgBase64 : (eqMain ? eqMain.imagem : null),
-    raia: eqMain ? (eqMain.raia || false) : false,
-    dataRaiaEntrada: eqMain ? (eqMain.dataRaiaEntrada || '—') : '—',
-    dataRaiaSaida: eqMain ? (eqMain.dataRaiaSaida || '—') : '—',
-    drogasil: eqMain ? (eqMain.drogasil || false) : false,
-    dataDrogasilEntrada: eqMain ? (eqMain.dataDrogasilEntrada || '—') : '—',
-    dataDrogasilSaida: eqMain ? (eqMain.dataDrogasilSaida || '—') : '—',
-    javaRaia: eqMain ? (eqMain.javaRaia || false) : false,
-    javaRaiaNumero: eqMain ? (eqMain.javaRaiaNumero || '—') : '—',
-    javaDrogasil: eqMain ? (eqMain.javaDrogasil || false) : false,
-    javaDrogasilNumero: eqMain ? (eqMain.javaDrogasilNumero || '—') : '—',
+    raia: (document.getElementById('e_check_raia') || {}).checked || false,
+    dataRaiaEntrada: (document.getElementById('e_data_raia_entrada') || {}).value || '—',
+    dataRaiaSaida: (document.getElementById('e_data_raia_saida') || {}).value || '—',
+    javaRaia: (document.getElementById('e_check_java_raia') || {}).checked || false,
+    javaRaiaNumero: (document.getElementById('e_java_raia_numero') || {}).value || '—',
+    drogasil: (document.getElementById('e_check_drogasil') || {}).checked || false,
+    dataDrogasilEntrada: (document.getElementById('e_data_drogasil_entrada') || {}).value || '—',
+    dataDrogasilSaida: (document.getElementById('e_data_drogasil_saida') || {}).value || '—',
+    javaDrogasil: (document.getElementById('e_check_java_drogasil') || {}).checked || false,
+    javaDrogasilNumero: (document.getElementById('e_java_drogasil_numero') || {}).value || '—',
     unidadeRaia: eqMain ? (eqMain.unidadeRaia || '—') : '—',
     unidadeDrogasil: eqMain ? (eqMain.unidadeDrogasil || '—') : '—'
   };
