@@ -2495,27 +2495,6 @@ function abrirEdicao(id) {
     eRedesWrap.style.display = isFarmacia ? 'block' : 'none';
 
     if(isFarmacia) {
-      // Bind checkbox events
-      ['raia','drogasil'].forEach(rede => {
-        const cb = document.getElementById('e_check_' + rede);
-        if(!cb) return;
-        cb.removeEventListener('change', cb._handler);
-        cb._handler = function() {
-          const wrap = document.getElementById('e_' + rede + '_wrap');
-          if(wrap) wrap.style.display = this.checked ? 'block' : 'none';
-        };
-        cb.addEventListener('change', cb._handler);
-
-        const jcb = document.getElementById('e_check_java_' + rede);
-        if(!jcb) return;
-        jcb.removeEventListener('change', jcb._handler);
-        jcb._handler = function() {
-          const jw = document.getElementById('e_java_' + rede + '_wrap');
-          if(jw) jw.style.display = this.checked ? 'block' : 'none';
-        };
-        jcb.addEventListener('change', jcb._handler);
-      });
-
       // Populate Raia
       const chkRaia = document.getElementById('e_check_raia');
       if(chkRaia) {
@@ -2774,6 +2753,31 @@ window.onload = function() {
 
   // Bind ficha técnica auto-bullet
   ['n_ficha','e_ficha','pendente_ficha','qa_ficha','farmacia_ficha'].forEach(bindFichaBullet);
+
+  // Bind edit modal redes checkboxes (farmácia)
+  ['raia','drogasil'].forEach(function(rede) {
+    var cb = document.getElementById('e_check_' + rede);
+    if(cb) cb.addEventListener('change', function() {
+      var wrap = document.getElementById('e_' + rede + '_wrap');
+      if(wrap) wrap.style.display = this.checked ? 'block' : 'none';
+      if(!this.checked) {
+        var e = document.getElementById('e_data_' + rede + '_entrada'); if(e) e.value = '';
+        var s = document.getElementById('e_data_' + rede + '_saida');   if(s) s.value = '';
+        var jcb = document.getElementById('e_check_java_' + rede);      if(jcb) jcb.checked = false;
+        var jw  = document.getElementById('e_java_' + rede + '_wrap');   if(jw) jw.style.display = 'none';
+        var jn  = document.getElementById('e_java_' + rede + '_numero'); if(jn) jn.value = '';
+      }
+    });
+
+    var jcb = document.getElementById('e_check_java_' + rede);
+    if(jcb) jcb.addEventListener('change', function() {
+      var jw = document.getElementById('e_java_' + rede + '_wrap');
+      if(jw) jw.style.display = this.checked ? 'block' : 'none';
+      if(!this.checked) {
+        var jn = document.getElementById('e_java_' + rede + '_numero'); if(jn) jn.value = '';
+      }
+    });
+  });
 
   // Load from Firebase when ready
   if(window._firebaseReady) {
