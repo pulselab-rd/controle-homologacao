@@ -1771,14 +1771,17 @@ async function fbLoadAll() {
       });
     } catch(e){}
 
+    // 7. Load status (which aba each equipamento belongs to)
+    await fbLoadStatus();
+
     equipamentos.sort((a,b)=>a.categoria.localeCompare(b.categoria)||a.nome.localeCompare(b.nome));
     updateStats();
     renderGlobal(equipamentos);
     buildBarChart();
     buildDonut();
     buildPills();
-    renderAba('equipamentos');
-            renderNovos();
+    renderTodasAbas();
+    renderNovos();
     populateCatSelects();
     showSyncStatus('✅ Sincronizado', 'var(--g1)');
     setTimeout(()=>showSyncStatus('', ''), 3000);
