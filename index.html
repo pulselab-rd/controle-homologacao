@@ -554,26 +554,35 @@
     const FB_KEY     = "AIzaSyDS2DFjNzzwM2rwGAY4Zow4gmk6yfFtPM";
     const FB_BASE    = "https://firestore.googleapis.com/v1/projects/" + FB_PROJECT + "/databases/(default)/documents";
 
-    // GET collection
+    // GET collection — with pagination support
     async function fbGetCollection(col) {
       try {
-        const r = await fetch(FB_BASE + "/" + col + "?key=" + FB_KEY);
-        const j = await r.json();
-        if (!j.documents) return [];
-        return j.documents.map(d => {
-          const id = d.name.split("/").pop();
-          const fields = d.fields || {};
-          const obj = { _id: id };
-          for (const [k, v] of Object.entries(fields)) {
-            if (v.stringValue !== undefined)  obj[k] = v.stringValue;
-            else if (v.integerValue !== undefined) obj[k] = parseInt(v.integerValue);
-            else if (v.doubleValue !== undefined)  obj[k] = parseFloat(v.doubleValue);
-            else if (v.booleanValue !== undefined) obj[k] = v.booleanValue;
-            else if (v.nullValue !== undefined)    obj[k] = null;
-            else obj[k] = JSON.stringify(v);
+        let allDocs = [];
+        let pageToken = null;
+        do {
+          let url = FB_BASE + "/" + col + "?key=" + FB_KEY + "&pageSize=300";
+          if(pageToken) url += "&pageToken=" + pageToken;
+          const r = await fetch(url);
+          const j = await r.json();
+          if (j.documents) {
+            j.documents.forEach(d => {
+              const id = d.name.split("/").pop();
+              const fields = d.fields || {};
+              const obj = { _id: id };
+              for (const [k, v] of Object.entries(fields)) {
+                if (v.stringValue !== undefined)  obj[k] = v.stringValue;
+                else if (v.integerValue !== undefined) obj[k] = parseInt(v.integerValue);
+                else if (v.doubleValue !== undefined)  obj[k] = parseFloat(v.doubleValue);
+                else if (v.booleanValue !== undefined) obj[k] = v.booleanValue;
+                else if (v.nullValue !== undefined)    obj[k] = null;
+                else obj[k] = JSON.stringify(v);
+              }
+              allDocs.push(obj);
+            });
           }
-          return obj;
-        });
+          pageToken = j.nextPageToken || null;
+        } while(pageToken);
+        return allDocs;
       } catch(e) { console.error("fbGetCollection", col, e); return []; }
     }
 
@@ -634,6 +643,7 @@
   <button class="tab" onclick="showTab('pendente')">⏳ Pendente Homologação</button>
   <button class="tab" onclick="showTab('qa')">🔬 Homologação em QA</button>
   <button class="tab" onclick="showTab('farmacia')">💊 Homologação em Farmácia</button>
+  <button class="tab" onclick="showTab('relatorio')">📋 Relatório</button>
   <button class="tab" onclick="showTab('novo')">➕ Novo Equipamento</button>
 </nav>
 
@@ -1067,6 +1077,79 @@
   </div>
 </section>
 
+<!-- ===== RELATÓRIO ===== -->
+<section class="section" id="tab-relatorio">
+  <div class="page-title">
+    <h2>📋 Relatório Geral</h2>
+    <p>Visão consolidada de todos os equipamentos e status de homologação</p>
+  </div>
+
+  <!-- Botão exportar PDF -->
+  <div style="display:flex;justify-content:flex-end;margin-bottom:20px;gap:10px;">
+    <button class="btn btn-outline" onclick="exportRelatorioCSV()">⬇ Exportar CSV</button>
+    <button class="btn btn-primary" onclick="imprimirRelatorio()">🖨️ Imprimir / PDF</button>
+  </div>
+
+  <!-- Cards de resumo -->
+  <div class="cards-grid" style="margin-bottom:24px;" id="rel-cards"></div>
+
+  <!-- Tabela por status -->
+  <div class="table-wrap" style="margin-bottom:24px;">
+    <div class="table-header">
+      <h3>📊 Distribuição por Status</h3>
+    </div>
+    <table>
+      <thead><tr><th>Status</th><th>Quantidade</th><th>%</th></tr></thead>
+      <tbody id="rel-status-table"></tbody>
+    </table>
+  </div>
+
+  <!-- Tabela por categoria -->
+  <div class="table-wrap" style="margin-bottom:24px;">
+    <div class="table-header">
+      <h3>📂 Equipamentos por Categoria</h3>
+    </div>
+    <table>
+      <thead><tr><th>Categoria</th><th>Total</th><th>Homologados</th><th>Pendente</th><th>QA</th><th>Farmácia</th></tr></thead>
+      <tbody id="rel-cat-table"></tbody>
+    </table>
+  </div>
+
+  <!-- Tabela por fornecedor -->
+  <div class="table-wrap" style="margin-bottom:24px;">
+    <div class="table-header">
+      <h3>🏭 Equipamentos por Fornecedor</h3>
+    </div>
+    <table>
+      <thead><tr><th>Fornecedor</th><th>Total</th><th>Modelos</th></tr></thead>
+      <tbody id="rel-forn-table"></tbody>
+    </table>
+  </div>
+
+  <!-- Tabela farmácia -->
+  <div class="table-wrap" style="margin-bottom:24px;">
+    <div class="table-header">
+      <h3>💊 Homologação em Farmácia — Detalhamento por Rede</h3>
+    </div>
+    <table>
+      <thead><tr><th>Equipamento</th><th>Rede</th><th>Entrada</th><th>Saída</th><th>Java</th></tr></thead>
+      <tbody id="rel-farmacia-table"></tbody>
+    </table>
+  </div>
+
+  <!-- Lista completa -->
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>📋 Lista Completa de Equipamentos</h3>
+      <input class="search-input" type="text" placeholder="🔍 Buscar..." id="rel-search" oninput="renderRelatorio()">
+    </div>
+    <table>
+      <thead><tr><th>#</th><th>Equipamento</th><th>Categoria</th><th>Fornecedor</th><th>Modelo</th><th>Part Number</th><th>Data</th><th>Status</th></tr></thead>
+      <tbody id="rel-lista-table"></tbody>
+    </table>
+  </div>
+</section>
+
 <!-- ===== NOVO EQUIPAMENTO ===== -->
 <section class="section" id="tab-novo">
   <div class="page-title">
@@ -1289,7 +1372,7 @@
       <div id="m_img_wrap" style="display:none;text-align:center;margin-bottom:10px;">
         <img id="m_img" style="max-width:100%;max-height:220px;border-radius:10px;object-fit:contain;border:1px solid var(--border);" />
       </div>
-      <div class="img-upload-area" id="m_img_upload_area" style="min-height:70px;padding:14px;">
+      <div class="img-upload-area" id="m_img_upload_area" style="min-height:70px;padding:14px;cursor:pointer;">
         <div class="img-upload-placeholder" id="m_img_upload_placeholder">
           <span style="font-size:22px;">📷</span>
           <span style="font-size:12px;">Clique para adicionar imagem</span>
@@ -1373,8 +1456,9 @@ function showTab(id) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   const tabs = document.querySelectorAll('.tab');
-  const map = {dashboard:0, equipamentos:1, pendente:2, qa:3, farmacia:4, novo:5};
+  const map = {dashboard:0, equipamentos:1, pendente:2, qa:3, farmacia:4, relatorio:5, novo:6};
   if(map[id] !== undefined) tabs[map[id]].classList.add('active');
+  if(id === 'relatorio') renderRelatorio();
 }
 
 // ============================================================
@@ -1510,6 +1594,7 @@ function buildDonut() {
 // MODAL
 // ============================================================
 let _modalCurrentId = null;
+let _editingId = null;
 
 function openModal(id) {
   const eq = equipamentos.find(e=>e.id===id);
@@ -1559,16 +1644,14 @@ function modalUploadImg() {
   if(file.size > 2 * 1024 * 1024) { showToast('⚠️ Imagem muito grande! Máx. 2MB.'); return; }
   const reader = new FileReader();
   reader.onload = function(ev) {
-    const b64 = ev.target.result;
+    comprimirImagem(ev.target.result, function(b64) {
     // Save to equipamento object
     const eq = equipamentos.find(e=>e.id===_modalCurrentId);
     if(eq) eq.imagem = b64;
-    // If it's a user-added item, save to localStorage too
     const novo = novosEquip.find(e=>e.id===_modalCurrentId);
-    if(novo) { novo.imagem = b64; saveStorage(); fbSaveEquip(novo); }
-    else {
-      saveBaseImage(_modalCurrentId, b64);
-    }
+    if(novo) { novo.imagem = b64; saveStorage(); }
+    // Always save image to dedicated images collection
+    fbSaveImage(_modalCurrentId, b64);
     // Update modal UI
     const mImgWrap = document.getElementById('m_img_wrap');
     const mImg = document.getElementById('m_img');
@@ -1579,6 +1662,7 @@ function modalUploadImg() {
     mPlaceholder.innerHTML = '<span style="font-size:12px;color:var(--text3);">📷 Clique para trocar a imagem</span>';
     mRemoveBtn.style.display = 'block';
     showToast('✅ Imagem salva!');
+    }); // fim comprimirImagem
   };
   reader.readAsDataURL(file);
 }
@@ -1588,8 +1672,9 @@ function modalRemoveImg() {
   const eq = equipamentos.find(e=>e.id===_modalCurrentId);
   if(eq) eq.imagem = null;
   const novo = novosEquip.find(e=>e.id===_modalCurrentId);
-  if(novo) { novo.imagem = null; saveStorage(); }
-  else { removeBaseImage(_modalCurrentId); }
+  if(novo) { novo.imagem = null; saveStorage(); fbSaveEquip(novo); }
+  // Always delete from Firebase images collection
+  fbDeleteImage(_modalCurrentId);
   const mImgWrap = document.getElementById('m_img_wrap');
   const mImg = document.getElementById('m_img');
   const mPlaceholder = document.getElementById('m_img_upload_placeholder');
@@ -1744,11 +1829,18 @@ async function fbLoadAll() {
       nextId = Math.max(...novosEquip.map(e=>e.id)) + 1;
     }
 
-    // 4. Load images
+    // 4. Load images from IMAGES_COLLECTION (overrides imagem field in equip doc)
     const imgs = await fbGetCollection(IMAGES_COLLECTION);
     imgs.forEach(d => {
       const eq = equipamentos.find(e=>e.id===parseInt(d._id));
-      if(eq) eq.imagem = d.imagem;
+      if(eq && d.imagem) eq.imagem = d.imagem;
+    });
+    // Also check imagem field directly in novosEquip docs (fallback)
+    novosEquip.forEach(eq => {
+      if(eq.imagem && eq.imagem !== 'null') {
+        const main = equipamentos.find(e=>e.id===eq.id);
+        if(main && !main.imagem) main.imagem = eq.imagem;
+      }
     });
 
     // 5. Load base edits
@@ -2037,13 +2129,15 @@ function bindTabImgEvents(tab) {
     if(file.size > 2 * 1024 * 1024) { showToast('⚠️ Imagem muito grande! Máx. 2MB.'); return; }
     const reader = new FileReader();
     reader.onload = ev => {
-      tabImgBase64[tab] = ev.target.result;
+      comprimirImagem(ev.target.result, function(b64) {
+      tabImgBase64[tab] = b64;
       const preview     = document.getElementById(tab + '_img_preview');
       const placeholder = document.getElementById(tab + '_img_placeholder');
       preview.src = ev.target.result;
       preview.style.display = 'block';
       placeholder.style.display = 'none';
       remove.style.display = 'inline-flex';
+      }); // fim comprimirImagem
     };
     reader.readAsDataURL(file);
   });
@@ -2165,6 +2259,7 @@ function salvarNovoNaAba(tab) {
   novosEquip.push(eq);
   saveStorage();
   fbSaveEquip(eq);
+  if(tabImgBase64[tab]) fbSaveImage(eq.id, tabImgBase64[tab]);
 
   // Set status for this tab
   equipStatus[eq.id] = tab;
@@ -2215,6 +2310,200 @@ function salvarNovoNaAba(tab) {
 }
 
 // ============================================================
+// RELATÓRIO
+// ============================================================
+const STATUS_NAMES = {
+  homologado: '✅ Homologados',
+  pendente:   '⏳ Pendente Homologação',
+  qa:         '🔬 Homologação em QA',
+  farmacia:   '💊 Homologação em Farmácia'
+};
+
+function getStatusEquip(eq) {
+  return equipStatus[eq.id] || equipStatus[String(eq.id)] || 'homologado';
+}
+
+function fmtData(d) {
+  if(!d || d === '—') return '—';
+  try { return new Date(d + 'T00:00:00').toLocaleDateString('pt-BR'); } catch(e) { return d; }
+}
+
+function renderRelatorio() {
+  const q = (document.getElementById('rel-search') || {}).value || '';
+  const total = equipamentos.length;
+
+  // Cards
+  const cardsEl = document.getElementById('rel-cards');
+  if(cardsEl) {
+    const counts = {homologado:0, pendente:0, qa:0, farmacia:0};
+    equipamentos.forEach(e => counts[getStatusEquip(e)]++);
+    cardsEl.innerHTML = `
+      <div class="card"><div class="card-label">📦 Total</div><div class="card-value">${total}</div></div>
+      <div class="card"><div class="card-label">✅ Homologados</div><div class="card-value">${counts.homologado}</div></div>
+      <div class="card yellow"><div class="card-label">⏳ Pendente</div><div class="card-value">${counts.pendente}</div></div>
+      <div class="card blue"><div class="card-label">🔬 Em QA</div><div class="card-value">${counts.qa}</div></div>
+      <div class="card orange"><div class="card-label">💊 Em Farmácia</div><div class="card-value">${counts.farmacia}</div></div>
+    `;
+  }
+
+  // Status table
+  const statusEl = document.getElementById('rel-status-table');
+  if(statusEl) {
+    const counts = {homologado:0, pendente:0, qa:0, farmacia:0};
+    equipamentos.forEach(e => counts[getStatusEquip(e)]++);
+    statusEl.innerHTML = Object.entries(counts).map(([s, n]) => `
+      <tr>
+        <td>${STATUS_NAMES[s]}</td>
+        <td style="font-weight:700;color:var(--g1);">${n}</td>
+        <td style="color:var(--text2);">${total ? (n/total*100).toFixed(1) : 0}%</td>
+      </tr>
+    `).join('');
+  }
+
+  // Category table
+  const catEl = document.getElementById('rel-cat-table');
+  if(catEl) {
+    const cats = {};
+    equipamentos.forEach(e => {
+      const s = getStatusEquip(e);
+      if(!cats[e.categoria]) cats[e.categoria] = {total:0,homologado:0,pendente:0,qa:0,farmacia:0};
+      cats[e.categoria].total++;
+      cats[e.categoria][s]++;
+    });
+    catEl.innerHTML = Object.entries(cats).sort((a,b)=>b[1].total-a[1].total).map(([cat, v]) => `
+      <tr>
+        <td class="td-name">${cat}</td>
+        <td style="font-weight:700;color:var(--g1);">${v.total}</td>
+        <td>${v.homologado||0}</td>
+        <td>${v.pendente||0}</td>
+        <td>${v.qa||0}</td>
+        <td>${v.farmacia||0}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Fornecedor table
+  const fornEl = document.getElementById('rel-forn-table');
+  if(fornEl) {
+    const forns = {};
+    equipamentos.forEach(e => {
+      const f = e.fornecedor||'—';
+      if(!forns[f]) forns[f] = {total:0, modelos: new Set()};
+      forns[f].total++;
+      if(e.modelo && e.modelo!=='—') forns[f].modelos.add(e.modelo);
+    });
+    fornEl.innerHTML = Object.entries(forns).sort((a,b)=>b[1].total-a[1].total).map(([f, v]) => `
+      <tr>
+        <td class="td-name">${f}</td>
+        <td style="font-weight:700;color:var(--g1);">${v.total}</td>
+        <td style="font-size:12px;color:var(--text2);">${v.modelos.size}</td>
+      </tr>
+    `).join('');
+  }
+
+  // Farmácia table
+  const farmEl = document.getElementById('rel-farmacia-table');
+  if(farmEl) {
+    const items = equipamentos.filter(e => getStatusEquip(e) === 'farmacia');
+    if(!items.length) {
+      farmEl.innerHTML = '<tr><td colspan="5" class="empty-state">Nenhum equipamento em homologação de farmácia.</td></tr>';
+    } else {
+      const rows = [];
+      items.forEach(e => {
+        if(e.raia) rows.push(`<tr>
+          <td class="td-name">${e.nome}</td>
+          <td><span class="badge badge-green">🏪 Raia</span></td>
+          <td style="font-size:12px;">${fmtData(e.dataRaiaEntrada)}</td>
+          <td style="font-size:12px;">${fmtData(e.dataRaiaSaida)}</td>
+          <td style="font-size:12px;">${e.javaRaia ? '☕ ' + (e.javaRaiaNumero||'—') : '—'}</td>
+        </tr>`);
+        if(e.drogasil) rows.push(`<tr>
+          <td class="td-name">${e.nome}</td>
+          <td><span class="badge badge-blue">🏪 Drogasil</span></td>
+          <td style="font-size:12px;">${fmtData(e.dataDrogasilEntrada)}</td>
+          <td style="font-size:12px;">${fmtData(e.dataDrogasilSaida)}</td>
+          <td style="font-size:12px;">${e.javaDrogasil ? '☕ ' + (e.javaDrogasilNumero||'—') : '—'}</td>
+        </tr>`);
+        if(!e.raia && !e.drogasil) rows.push(`<tr>
+          <td class="td-name">${e.nome}</td>
+          <td>—</td><td>—</td><td>—</td><td>—</td>
+        </tr>`);
+      });
+      farmEl.innerHTML = rows.join('');
+    }
+  }
+
+  // Lista completa
+  const listaEl = document.getElementById('rel-lista-table');
+  if(listaEl) {
+    let items = [...equipamentos];
+    if(q) items = items.filter(e =>
+      e.nome.toLowerCase().includes(q.toLowerCase()) ||
+      e.categoria.toLowerCase().includes(q.toLowerCase()) ||
+      (e.fornecedor||'').toLowerCase().includes(q.toLowerCase())
+    );
+    if(!items.length) {
+      listaEl.innerHTML = '<tr><td colspan="8" class="empty-state">Nenhum resultado.</td></tr>';
+    } else {
+      listaEl.innerHTML = items.map((e,i) => `
+        <tr>
+          <td style="color:var(--g1);font-weight:700;">${i+1}</td>
+          <td class="td-name">${e.nome}</td>
+          <td><span class="badge ${catColors[e.categoria]||'badge-green'}">${e.categoria}</span></td>
+          <td>${e.fornecedor||'—'}</td>
+          <td style="font-size:12px;color:var(--text3);">${e.modelo||'—'}</td>
+          <td style="font-size:12px;color:var(--text2);">${e.partnum||'—'}</td>
+          <td style="font-size:12px;color:var(--text2);">${fmtData(e.data)}</td>
+          <td><span class="badge ${
+            getStatusEquip(e)==='homologado'?'badge-green':
+            getStatusEquip(e)==='pendente'?'badge-yellow':
+            getStatusEquip(e)==='qa'?'badge-blue':'badge-orange'
+          }">${STATUS_NAMES[getStatusEquip(e)]}</span></td>
+        </tr>
+      `).join('');
+    }
+  }
+}
+
+function exportRelatorioCSV() {
+  const rows = [['#','Equipamento','Categoria','Fornecedor','Modelo','Part Number','Data','Status']];
+  equipamentos.forEach((e,i) => rows.push([
+    i+1, e.nome, e.categoria, e.fornecedor||'—', e.modelo||'—',
+    e.partnum||'—', fmtData(e.data), STATUS_NAMES[getStatusEquip(e)]
+  ]));
+  const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('\uFEFF' + csv);
+  a.download = 'relatorio_homologacao.csv';
+  a.click();
+  showToast('⬇ Relatório exportado!');
+}
+
+function imprimirRelatorio() {
+  window.print();
+}
+
+// ============================================================
+// COMPRESSÃO DE IMAGEM — reduz para no máximo 400px e qualidade 60%
+// ============================================================
+function comprimirImagem(b64, callback) {
+  const img = new Image();
+  img.onload = function() {
+    const MAX = 400;
+    let w = img.width, h = img.height;
+    if(w > MAX || h > MAX) {
+      if(w > h) { h = Math.round(h * MAX / w); w = MAX; }
+      else       { w = Math.round(w * MAX / h); h = MAX; }
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+    callback(canvas.toDataURL('image/jpeg', 0.6));
+  };
+  img.src = b64;
+}
+
+// ============================================================
 // IMAGEM — UPLOAD, PREVIEW, REMOVE
 // ============================================================
 let n_imgBase64 = null;
@@ -2227,32 +2516,45 @@ function previewImg(prefix) {
   if(file.size > 2 * 1024 * 1024) { showToast('⚠️ Imagem muito grande! Máx. 2MB.'); return; }
   const reader = new FileReader();
   reader.onload = function(ev) {
-    const b64 = ev.target.result;
-    if(prefix === 'n') n_imgBase64 = b64;
-    else e_imgBase64 = b64;
-    const preview = document.getElementById(prefix + '_img_preview');
-    const placeholder = document.getElementById(prefix + '_img_placeholder');
-    const remove = document.getElementById(prefix + '_img_remove');
-    preview.src = b64;
-    preview.style.display = 'block';
-    placeholder.style.display = 'none';
-    remove.style.display = 'inline-flex';
+    comprimirImagem(ev.target.result, function(b64) {
+      if(prefix === 'n') n_imgBase64 = b64;
+      else e_imgBase64 = b64;
+      const preview = document.getElementById(prefix + '_img_preview');
+      const placeholder = document.getElementById(prefix + '_img_placeholder');
+      const remove = document.getElementById(prefix + '_img_remove');
+      preview.src = b64;
+      preview.style.display = 'block';
+      placeholder.style.display = 'none';
+      remove.style.display = 'inline-flex';
+    });
   };
   reader.readAsDataURL(file);
 }
 
 function removeImg(prefix) {
-  if(prefix === 'n') n_imgBase64 = null;
-  else e_imgBase64 = null;
+  if(prefix === 'n') {
+    n_imgBase64 = null;
+  } else if(prefix === 'e') {
+    e_imgBase64 = null;
+    // Deletar imagem do Firebase
+    if(_editingId) {
+      fbDeleteImage(_editingId);
+      // Atualizar no array local
+      const eq = equipamentos.find(e=>e.id===_editingId);
+      if(eq) eq.imagem = null;
+      const novo = novosEquip.find(e=>e.id===_editingId);
+      if(novo) { novo.imagem = null; saveStorage(); }
+    }
+  }
   const preview = document.getElementById(prefix + '_img_preview');
   const placeholder = document.getElementById(prefix + '_img_placeholder');
   const remove = document.getElementById(prefix + '_img_remove');
   const input = document.getElementById(prefix + '_img_input');
-  preview.src = '';
-  preview.style.display = 'none';
-  placeholder.style.display = 'flex';
-  remove.style.display = 'none';
-  input.value = '';
+  if(preview) { preview.src = ''; preview.style.display = 'none'; }
+  if(placeholder) placeholder.style.display = 'flex';
+  if(remove) remove.style.display = 'none';
+  if(input) input.value = '';
+  if(prefix === 'e') showToast('🗑 Imagem removida.');
 }
 
 // ============================================================
@@ -2339,6 +2641,7 @@ function salvarNovo() {
   equipamentos.push(eq);
   saveStorage();
   fbSaveEquip(eq);
+  if(n_imgBase64) fbSaveImage(eq.id, n_imgBase64);
   // Salva status como homologado por padrão
   equipStatus[eq.id] = 'homologado';
   fbSaveStatus(eq.id, 'homologado');
@@ -2423,6 +2726,7 @@ function abrirEdicao(id) {
   const eq = equipamentos.find(e=>e.id===id);
   if(!eq) return;
   document.getElementById('e_id').value = id;
+  _editingId = id;
   document.getElementById('e_nome').value = eq.nome;
   document.getElementById('e_modelo').value = eq.modelo === '—' ? '' : eq.modelo;
   document.getElementById('e_fornecedor').value = eq.fornecedor === '—' ? '' : eq.fornecedor;
@@ -2532,6 +2836,8 @@ function salvarEdicao() {
     saveBaseEdit(id, updated);
     fbSaveEdit(id, updated);
   }
+  // Sempre salva imagem na coleção de imagens também
+  if(updated.imagem) fbSaveImage(id, updated.imagem);
   renderNovos();
   reRenderAll();
   closeEditBtn();
@@ -2756,6 +3062,9 @@ window.onload = function() {
   window.modalRemoveImg  = modalRemoveImg;
   window.removerDaAba    = removerDaAba;
   window.buildMoverSelect = buildMoverSelect;
+  window.renderRelatorio = renderRelatorio;
+  window.exportRelatorioCSV = exportRelatorioCSV;
+  window.imprimirRelatorio = imprimirRelatorio;
   window.renderAba       = renderAba;
   window.buildPills      = buildPills;
 };
