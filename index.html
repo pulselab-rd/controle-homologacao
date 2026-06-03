@@ -1267,68 +1267,7 @@
         <input type="file" id="e_img_input" accept="image/*" style="display:none">
         <button class="btn btn-outline" id="e_img_remove" style="display:none;margin-top:6px;font-size:11px;">✕ Remover imagem</button>
       </div>
-      <!-- Redes de Farmácia — visível apenas quando equip está na aba farmácia -->
-      <div class="form-group" style="grid-column:1/-1" id="e_farmacia_wrap" style="display:none;">
-        <label>REDES DE FARMÁCIA</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;">
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-              <input type="checkbox" id="e_check_raia" style="width:16px;height:16px;accent-color:var(--g1);cursor:pointer;" onclick="var w=document.getElementById('e_raia_wrap');if(w)w.style.display=this.checked?'block':'none';">
-              <label for="e_check_raia" style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">🏪 Raia</label>
-            </div>
-            <div id="e_raia_wrap" style="display:none;">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                <div>
-                  <label style="font-size:11px;color:var(--text3);">ENTRADA</label>
-                  <input class="form-input" type="date" id="e_data_raia_entrada" style="margin-top:4px;">
-                </div>
-                <div>
-                  <label style="font-size:11px;color:var(--text3);">SAÍDA</label>
-                  <input class="form-input" type="date" id="e_data_raia_saida" style="margin-top:4px;">
-                </div>
-              </div>
-              <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                  <input type="checkbox" id="e_check_java_raia" style="width:14px;height:14px;accent-color:var(--g1);cursor:pointer;" onclick="var w=document.getElementById('e_java_raia_wrap');if(w)w.style.display=this.checked?'block':'none';">
-                  <label for="e_check_java_raia" style="font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;">☕ Java</label>
-                </div>
-                <div id="e_java_raia_wrap" style="display:none;">
-                  <label style="font-size:11px;color:var(--text3);">NÚMERO JAVA</label>
-                  <input class="form-input" type="text" id="e_java_raia_numero" placeholder="Ex: 12345" style="margin-top:4px;">
-                </div>
-              </div>
-            </div>
-          </div>
-          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-              <input type="checkbox" id="e_check_drogasil" style="width:16px;height:16px;accent-color:var(--g1);cursor:pointer;" onclick="var w=document.getElementById('e_drogasil_wrap');if(w)w.style.display=this.checked?'block':'none';">
-              <label for="e_check_drogasil" style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">🏪 Drogasil</label>
-            </div>
-            <div id="e_drogasil_wrap" style="display:none;">
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                <div>
-                  <label style="font-size:11px;color:var(--text3);">ENTRADA</label>
-                  <input class="form-input" type="date" id="e_data_drogasil_entrada" style="margin-top:4px;">
-                </div>
-                <div>
-                  <label style="font-size:11px;color:var(--text3);">SAÍDA</label>
-                  <input class="form-input" type="date" id="e_data_drogasil_saida" style="margin-top:4px;">
-                </div>
-              </div>
-              <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                  <input type="checkbox" id="e_check_java_drogasil" style="width:14px;height:14px;accent-color:var(--g1);cursor:pointer;" onclick="var w=document.getElementById('e_java_drogasil_wrap');if(w)w.style.display=this.checked?'block':'none';">
-                  <label for="e_check_java_drogasil" style="font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;">☕ Java</label>
-                </div>
-                <div id="e_java_drogasil_wrap" style="display:none;">
-                  <label style="font-size:11px;color:var(--text3);">NÚMERO JAVA</label>
-                  <input class="form-input" type="text" id="e_java_drogasil_numero" placeholder="Ex: 12345" style="margin-top:4px;">
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+
     </div>
     <div style="display:flex;gap:10px;margin-top:4px;">
       <button class="btn btn-primary" onclick="salvarEdicao()" style="flex:1;">💾 Salvar Alterações</button>
