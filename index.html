@@ -730,7 +730,6 @@
           <th>Fornecedor</th>
           <th>Modelo</th>
           <th>Part Number</th>
-          <th>Data</th>
           <th>Ficha</th>
         </tr>
       </thead>
@@ -788,7 +787,7 @@
       </div>
     </div>
     <table>
-      <thead><tr><th>#</th><th>Equipamento</th><th>Categoria</th><th>Fornecedor</th><th>Modelo</th><th>Part Number</th><th>Data</th><th>Ações</th></tr></thead>
+      <thead><tr><th>#</th><th>Equipamento</th><th>Categoria</th><th>Fornecedor</th><th>Modelo</th><th>Part Number</th><th>Ações</th></tr></thead>
       <tbody id="pendenteTable"></tbody>
     </table>
   </div>
@@ -811,7 +810,7 @@
       </div>
     </div>
     <table>
-      <thead><tr><th>#</th><th>Equipamento</th><th>Categoria</th><th>Fornecedor</th><th>Modelo</th><th>Part Number</th><th>Data</th><th>Ações</th></tr></thead>
+      <thead><tr><th>#</th><th>Equipamento</th><th>Categoria</th><th>Fornecedor</th><th>Modelo</th><th>Part Number</th><th>Ações</th></tr></thead>
       <tbody id="qaTable"></tbody>
     </table>
   </div>
@@ -907,7 +906,7 @@
       <input class="search-input" type="text" placeholder="🔍 Buscar..." id="rel-search" oninput="renderRelatorio()">
     </div>
     <table>
-      <thead><tr><th>#</th><th>Equipamento</th><th>Categoria</th><th>Fornecedor</th><th>Modelo</th><th>Part Number</th><th>Data</th><th>Status</th></tr></thead>
+      <thead><tr><th>#</th><th>Equipamento</th><th>Categoria</th><th>Fornecedor</th><th>Modelo</th><th>Part Number</th><th>Status</th></tr></thead>
       <tbody id="rel-lista-table"></tbody>
     </table>
   </div>
@@ -955,10 +954,6 @@
         </div>
       </div>
       <div class="form-group">
-        <label>DATA</label>
-        <input class="form-input" type="date" id="n_data">
-      </div>
-      <div class="form-group">
         <label>DESTINO</label>
         <select class="form-input" id="n_destino">
           <option value="homologado">✅ Equipamentos Homologados</option>
@@ -1000,7 +995,7 @@
       </div>
     </div>
     <table>
-      <thead><tr><th>#</th><th>Equipamento</th><th>Categoria</th><th>Fornecedor</th><th>Modelo</th><th>Part Number</th><th>Data</th><th>Ação</th></tr></thead>
+      <thead><tr><th>#</th><th>Equipamento</th><th>Categoria</th><th>Fornecedor</th><th>Modelo</th><th>Part Number</th><th>Ação</th></tr></thead>
       <tbody id="novosTable"><tr><td colspan="6" class="empty-state">Nenhum equipamento cadastrado ainda.</td></tr></tbody>
     </table>
   </div>
@@ -1033,10 +1028,6 @@
       <div class="form-group">
         <label>PART NUMBER</label>
         <input class="form-input" type="text" placeholder="Ex: 40N9020" id="e_partnum">
-      </div>
-      <div class="form-group">
-        <label>DATA</label>
-        <input class="form-input" type="date" id="e_data">
       </div>
       <div class="form-group">
         <label>CATEGORIA</label>
@@ -1278,7 +1269,6 @@ function renderGlobal(items) {
       <td>${eq.fornecedor}</td>
       <td style="font-size:12px;color:var(--text3);">${eq.modelo}</td>
       <td style="font-size:12px;color:var(--text2);">${eq.partnum||'—'}</td>
-      <td style="font-size:12px;color:var(--text2);">${eq.data && eq.data!=='—' ? new Date(eq.data+'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
       <td>${fichaBtn(eq)}</td>
     </tr>
   `).join('');
@@ -1842,7 +1832,6 @@ function renderAba(tabKey) {
       <td>${eq.fornecedor}</td>
       <td style="font-size:12px;color:var(--text3);">${eq.modelo}</td>
       <td style="font-size:12px;color:var(--text2);">${eq.partnum||'—'}</td>
-      <td style="font-size:12px;color:var(--text2);">${eq.data && eq.data!=='—' ? new Date(eq.data+'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
       ${status==='farmacia' ? `<td style="font-size:12px;color:var(--text2);">${eq.unidade||'—'}</td>` : ''}
       <td>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
@@ -2229,7 +2218,6 @@ function renderRelatorio() {
           <td>${e.fornecedor||'—'}</td>
           <td style="font-size:12px;color:var(--text3);">${e.modelo||'—'}</td>
           <td style="font-size:12px;color:var(--text2);">${e.partnum||'—'}</td>
-          <td style="font-size:12px;color:var(--text2);">${fmtData(e.data)}</td>
           <td><span class="badge ${
             getStatusEquip(e)==='homologado'?'badge-green':
             getStatusEquip(e)==='pendente'?'badge-yellow':
@@ -2242,10 +2230,10 @@ function renderRelatorio() {
 }
 
 function exportRelatorioCSV() {
-  const rows = [['#','Equipamento','Categoria','Fornecedor','Modelo','Part Number','Data','Status']];
+  const rows = [['#','Equipamento','Categoria','Fornecedor','Modelo','Part Number','Status']];
   equipamentos.forEach((e,i) => rows.push([
     i+1, e.nome, e.categoria, e.fornecedor||'—', e.modelo||'—',
-    e.partnum||'—', fmtData(e.data), STATUS_NAMES[getStatusEquip(e)]
+    e.partnum||'—', STATUS_NAMES[getStatusEquip(e)]
   ]));
   const csv = rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
   const a = document.createElement('a');
@@ -2416,7 +2404,9 @@ function salvarNovo() {
   novosEquip.push(eq);
   equipamentos.push(eq);
   saveStorage();
-  fbSaveEquip(eq);
+  // Save equip without image in main doc, image goes to images collection
+  const eqSemImagem = Object.assign({}, eq, {imagem: null});
+  fbSaveEquip(eqSemImagem);
   if(n_imgBase64) fbSaveImage(eq.id, n_imgBase64);
   // Salva status conforme destino selecionado
   const destino = document.getElementById('n_destino').value || 'homologado';
@@ -2449,7 +2439,6 @@ function renderNovos() {
       <td>${eq.fornecedor}</td>
       <td style="font-size:12px;color:var(--text3);">${eq.modelo}</td>
       <td style="font-size:12px;color:var(--text2);">${eq.partnum||'—'}</td>
-      <td style="font-size:12px;color:var(--text2);">${eq.data && eq.data!=='—' ? new Date(eq.data+'T00:00:00').toLocaleDateString('pt-BR') : '—'}</td>
       <td style="display:flex;gap:6px;">
         <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;" onclick="abrirEdicao(${eq.id})">✏️</button>
         <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;border-color:var(--red);color:var(--red);" onclick="excluir(${eq.id})">🗑</button>
@@ -2508,7 +2497,6 @@ function abrirEdicao(id) {
   document.getElementById('e_modelo').value = eq.modelo === '—' ? '' : eq.modelo;
   document.getElementById('e_fornecedor').value = eq.fornecedor === '—' ? '' : eq.fornecedor;
   document.getElementById('e_partnum').value = eq.partnum && eq.partnum !== '—' ? eq.partnum : '';
-  document.getElementById('e_data').value = eq.data && eq.data !== '—' ? eq.data : '';
   document.getElementById('e_categoria').value = eq.categoria;
   document.getElementById('e_ficha').value = eq.ficha;
   // Mostrar redes de farmácia só se o equipamento for da aba farmácia
@@ -2587,7 +2575,6 @@ function salvarEdicao() {
     modelo: document.getElementById('e_modelo').value.trim() || '—',
     fornecedor: document.getElementById('e_fornecedor').value.trim() || '—',
     partnum: document.getElementById('e_partnum').value.trim() || '—',
-    data: document.getElementById('e_data').value || '—',
     categoria,
     ficha: document.getElementById('e_ficha').value.trim(),
     imagem: e_imgBase64 !== undefined ? e_imgBase64 : (eqMain ? eqMain.imagem : null),
@@ -2613,8 +2600,9 @@ function salvarEdicao() {
     saveBaseEdit(id, updated);
     fbSaveEdit(id, updated);
   }
-  // Sempre salva imagem na coleção de imagens também
+  // Sempre salva ou remove imagem na coleção de imagens
   if(updated.imagem) fbSaveImage(id, updated.imagem);
+  else fbDeleteImage(id);
   renderNovos();
   reRenderAll();
   closeEditBtn();
@@ -2842,6 +2830,8 @@ window.onload = function() {
   window.renderRelatorio = renderRelatorio;
   window.exportRelatorioCSV = exportRelatorioCSV;
   window.imprimirRelatorio = imprimirRelatorio;
+  window.showToast = showToast;
+  window.showSyncStatus = showSyncStatus;
   window.renderAba       = renderAba;
   window.buildPills      = buildPills;
 };
