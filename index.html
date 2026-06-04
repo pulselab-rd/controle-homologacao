@@ -778,63 +778,6 @@
     <p>Equipamentos aguardando processo de homologação</p>
   </div>
 
-  <!-- Formulário rápido -->
-  <div class="form-card" style="margin-bottom:20px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;cursor:pointer;" onclick="toggleForm('pendente')">
-      <div class="form-title" style="margin-bottom:0;">➕ Novo equipamento nesta aba</div>
-      <span id="pendente_form_icon" style="color:var(--g1);font-size:18px;">＋</span>
-    </div>
-    <div id="pendente_form_body" style="display:none;">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>NOME DO EQUIPAMENTO</label>
-          <input class="form-input" type="text" placeholder="Ex: Impressora Laser..." id="pendente_nome">
-        </div>
-        <div class="form-group">
-          <label>MODELO</label>
-          <input class="form-input" type="text" placeholder="Ex: MX532adwe" id="pendente_modelo">
-        </div>
-        <div class="form-group">
-          <label>FORNECEDOR / MARCA</label>
-          <input class="form-input" type="text" placeholder="Ex: Lexmark" id="pendente_fornecedor">
-        </div>
-        <div class="form-group">
-          <label>PART NUMBER</label>
-          <input class="form-input" type="text" placeholder="Ex: 40N9020" id="pendente_partnum">
-        </div>
-        <div class="form-group">
-          <label>DATA</label>
-          <input class="form-input" type="date" id="pendente_data">
-        </div>
-        <div class="form-group">
-          <label>CATEGORIA</label>
-          <select class="form-input" id="pendente_categoria"></select>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>FICHA TÉCNICA</label>
-          <textarea class="form-input" rows="3" placeholder="• Tipo: ...&#10;• Conectividade: ..." id="pendente_ficha" style="resize:vertical"></textarea>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>IMAGEM DO EQUIPAMENTO</label>
-          <div class="img-upload-area" id="pendente_img_area" style="min-height:80px;">
-            <div class="img-upload-placeholder" id="pendente_img_placeholder">
-              <span style="font-size:26px;">📷</span>
-              <span>Clique para adicionar imagem</span>
-              <span style="font-size:11px;color:var(--text2);">JPG, PNG, WEBP — máx. 2MB</span>
-            </div>
-            <img id="pendente_img_preview" style="display:none;max-width:100%;max-height:160px;border-radius:8px;object-fit:contain;" />
-          </div>
-          <input type="file" id="pendente_img_input" accept="image/*" style="display:none">
-          <button class="btn btn-outline" id="pendente_img_remove" style="display:none;margin-top:6px;font-size:11px;">✕ Remover imagem</button>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-primary" style="min-width:180px;" onclick="salvarNovoNaAba('pendente')">💾 Salvar em Pendente Homologação</button>
-        <button class="btn btn-outline" onclick="toggleForm('pendente')">✕ Cancelar</button>
-      </div>
-    </div>
-  </div>
-
   <div class="filter-pills" id="catPillsPendente"></div>
   <div class="table-wrap">
     <div class="table-header">
@@ -858,63 +801,6 @@
     <p>Equipamentos em processo de Quality Assurance</p>
   </div>
 
-  <!-- Formulário rápido -->
-  <div class="form-card" style="margin-bottom:20px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;cursor:pointer;" onclick="toggleForm('qa')">
-      <div class="form-title" style="margin-bottom:0;">➕ Novo equipamento nesta aba</div>
-      <span id="qa_form_icon" style="color:var(--g1);font-size:18px;">＋</span>
-    </div>
-    <div id="qa_form_body" style="display:none;">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>NOME DO EQUIPAMENTO</label>
-          <input class="form-input" type="text" placeholder="Ex: Impressora Laser..." id="qa_nome">
-        </div>
-        <div class="form-group">
-          <label>MODELO</label>
-          <input class="form-input" type="text" placeholder="Ex: MX532adwe" id="qa_modelo">
-        </div>
-        <div class="form-group">
-          <label>FORNECEDOR / MARCA</label>
-          <input class="form-input" type="text" placeholder="Ex: Lexmark" id="qa_fornecedor">
-        </div>
-        <div class="form-group">
-          <label>PART NUMBER</label>
-          <input class="form-input" type="text" placeholder="Ex: 40N9020" id="qa_partnum">
-        </div>
-        <div class="form-group">
-          <label>DATA</label>
-          <input class="form-input" type="date" id="qa_data">
-        </div>
-        <div class="form-group">
-          <label>CATEGORIA</label>
-          <select class="form-input" id="qa_categoria"></select>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>FICHA TÉCNICA</label>
-          <textarea class="form-input" rows="3" placeholder="• Tipo: ...&#10;• Conectividade: ..." id="qa_ficha" style="resize:vertical"></textarea>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>IMAGEM DO EQUIPAMENTO</label>
-          <div class="img-upload-area" id="qa_img_area" style="min-height:80px;">
-            <div class="img-upload-placeholder" id="qa_img_placeholder">
-              <span style="font-size:26px;">📷</span>
-              <span>Clique para adicionar imagem</span>
-              <span style="font-size:11px;color:var(--text2);">JPG, PNG, WEBP — máx. 2MB</span>
-            </div>
-            <img id="qa_img_preview" style="display:none;max-width:100%;max-height:160px;border-radius:8px;object-fit:contain;" />
-          </div>
-          <input type="file" id="qa_img_input" accept="image/*" style="display:none">
-          <button class="btn btn-outline" id="qa_img_remove" style="display:none;margin-top:6px;font-size:11px;">✕ Remover imagem</button>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-primary" style="min-width:180px;" onclick="salvarNovoNaAba('qa')">💾 Salvar em Homologação em QA</button>
-        <button class="btn btn-outline" onclick="toggleForm('qa')">✕ Cancelar</button>
-      </div>
-    </div>
-  </div>
-
   <div class="filter-pills" id="catPillsQa"></div>
   <div class="table-wrap">
     <div class="table-header">
@@ -936,129 +822,6 @@
   <div class="page-title">
     <h2>💊 Homologação em Farmácia</h2>
     <p>Equipamentos em homologação no ambiente de farmácia</p>
-  </div>
-
-  <!-- Formulário rápido -->
-  <div class="form-card" style="margin-bottom:20px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;cursor:pointer;" onclick="toggleForm('farmacia')">
-      <div class="form-title" style="margin-bottom:0;">➕ Novo equipamento nesta aba</div>
-      <span id="farmacia_form_icon" style="color:var(--g1);font-size:18px;">＋</span>
-    </div>
-    <div id="farmacia_form_body" style="display:none;">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>NOME DO EQUIPAMENTO</label>
-          <input class="form-input" type="text" placeholder="Ex: Impressora Laser..." id="farmacia_nome">
-        </div>
-        <div class="form-group" style="grid-column:1/-1;">
-          <label>REDES DE FARMÁCIA</label>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
-
-            <!-- RAIA -->
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                <input type="checkbox" id="farmacia_check_raia" style="width:16px;height:16px;accent-color:var(--g1);cursor:pointer;">
-                <label for="farmacia_check_raia" style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">🏪 Raia</label>
-              </div>
-              <div id="farmacia_raia_data_wrap" style="display:none;">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                  <div>
-                    <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">ENTRADA</label>
-                    <input class="form-input" type="date" id="farmacia_data_raia_entrada" style="margin-top:4px;">
-                  </div>
-                  <div>
-                    <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">SAÍDA</label>
-                    <input class="form-input" type="date" id="farmacia_data_raia_saida" style="margin-top:4px;">
-                  </div>
-                </div>
-                <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                    <input type="checkbox" id="farmacia_check_java_raia" style="width:14px;height:14px;accent-color:var(--g1);cursor:pointer;">
-                    <label for="farmacia_check_java_raia" style="font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;">☕ Java</label>
-                  </div>
-                  <div id="farmacia_java_raia_wrap" style="display:none;">
-                    <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">NÚMERO JAVA</label>
-                    <input class="form-input" type="text" id="farmacia_java_raia_numero" placeholder="Ex: 12345" style="margin-top:4px;">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- DROGASIL -->
-            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px;">
-              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
-                <input type="checkbox" id="farmacia_check_drogasil" style="width:16px;height:16px;accent-color:var(--g1);cursor:pointer;">
-                <label for="farmacia_check_drogasil" style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">🏪 Drogasil</label>
-              </div>
-              <div id="farmacia_drogasil_data_wrap" style="display:none;">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                  <div>
-                    <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">ENTRADA</label>
-                    <input class="form-input" type="date" id="farmacia_data_drogasil_entrada" style="margin-top:4px;">
-                  </div>
-                  <div>
-                    <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">SAÍDA</label>
-                    <input class="form-input" type="date" id="farmacia_data_drogasil_saida" style="margin-top:4px;">
-                  </div>
-                </div>
-                <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-                    <input type="checkbox" id="farmacia_check_java_drogasil" style="width:14px;height:14px;accent-color:var(--g1);cursor:pointer;">
-                    <label for="farmacia_check_java_drogasil" style="font-size:12px;font-weight:600;color:var(--text3);cursor:pointer;">☕ Java</label>
-                  </div>
-                  <div id="farmacia_java_drogasil_wrap" style="display:none;">
-                    <label style="font-size:11px;color:var(--text3);letter-spacing:.5px;">NÚMERO JAVA</label>
-                    <input class="form-input" type="text" id="farmacia_java_drogasil_numero" placeholder="Ex: 12345" style="margin-top:4px;">
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-        <div class="form-group">
-          <label>MODELO</label>
-          <input class="form-input" type="text" placeholder="Ex: MX532adwe" id="farmacia_modelo">
-        </div>
-        <div class="form-group">
-          <label>FORNECEDOR / MARCA</label>
-          <input class="form-input" type="text" placeholder="Ex: Lexmark" id="farmacia_fornecedor">
-        </div>
-        <div class="form-group">
-          <label>PART NUMBER</label>
-          <input class="form-input" type="text" placeholder="Ex: 40N9020" id="farmacia_partnum">
-        </div>
-        <div class="form-group">
-          <label>DATA</label>
-          <input class="form-input" type="date" id="farmacia_data">
-        </div>
-        <div class="form-group">
-          <label>CATEGORIA</label>
-          <select class="form-input" id="farmacia_categoria"></select>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>FICHA TÉCNICA</label>
-          <textarea class="form-input" rows="3" placeholder="• Tipo: ...&#10;• Conectividade: ..." id="farmacia_ficha" style="resize:vertical"></textarea>
-        </div>
-        <div class="form-group" style="grid-column:1/-1">
-          <label>IMAGEM DO EQUIPAMENTO</label>
-          <div class="img-upload-area" id="farmacia_img_area" style="min-height:80px;">
-            <div class="img-upload-placeholder" id="farmacia_img_placeholder">
-              <span style="font-size:26px;">📷</span>
-              <span>Clique para adicionar imagem</span>
-              <span style="font-size:11px;color:var(--text2);">JPG, PNG, WEBP — máx. 2MB</span>
-            </div>
-            <img id="farmacia_img_preview" style="display:none;max-width:100%;max-height:160px;border-radius:8px;object-fit:contain;" />
-          </div>
-          <input type="file" id="farmacia_img_input" accept="image/*" style="display:none">
-          <button class="btn btn-outline" id="farmacia_img_remove" style="display:none;margin-top:6px;font-size:11px;">✕ Remover imagem</button>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-primary" style="min-width:180px;" onclick="salvarNovoNaAba('farmacia')">💾 Salvar em Homologação em Farmácia</button>
-        <button class="btn btn-outline" onclick="toggleForm('farmacia')">✕ Cancelar</button>
-      </div>
-    </div>
   </div>
 
   <div class="filter-pills" id="catPillsFarmacia"></div>
@@ -1190,6 +953,19 @@
           <button class="btn btn-primary" id="btn_nova_cat_salvar" style="white-space:nowrap;font-size:12px;">✓ Adicionar</button>
           <button class="btn btn-outline" id="btn_nova_cat_cancelar" style="white-space:nowrap;font-size:12px;">✕</button>
         </div>
+      </div>
+      <div class="form-group">
+        <label>DATA</label>
+        <input class="form-input" type="date" id="n_data">
+      </div>
+      <div class="form-group">
+        <label>DESTINO</label>
+        <select class="form-input" id="n_destino">
+          <option value="homologado">✅ Equipamentos Homologados</option>
+          <option value="pendente">⏳ Pendente Homologação</option>
+          <option value="qa">🔬 Homologação em QA</option>
+          <option value="farmacia">💊 Homologação em Farmácia</option>
+        </select>
       </div>
       <div class="form-group" style="grid-column:1/-1">
         <label>FICHA TÉCNICA</label>
@@ -2642,9 +2418,10 @@ function salvarNovo() {
   saveStorage();
   fbSaveEquip(eq);
   if(n_imgBase64) fbSaveImage(eq.id, n_imgBase64);
-  // Salva status como homologado por padrão
-  equipStatus[eq.id] = 'homologado';
-  fbSaveStatus(eq.id, 'homologado');
+  // Salva status conforme destino selecionado
+  const destino = document.getElementById('n_destino').value || 'homologado';
+  equipStatus[eq.id] = destino;
+  fbSaveStatus(eq.id, destino);
   renderNovos();
   reRenderAll();
   document.getElementById('n_nome').value='';
