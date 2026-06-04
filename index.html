@@ -849,7 +849,19 @@
   <!-- Botão exportar PDF -->
   <div style="display:flex;justify-content:flex-end;margin-bottom:20px;gap:10px;">
     <button class="btn btn-outline" onclick="exportRelatorioCSV()">⬇ Exportar CSV</button>
+    <button class="btn btn-outline" onclick="toggleTextoRelatorio()">📄 Ver como Texto</button>
     <button class="btn btn-primary" onclick="imprimirRelatorio()">🖨️ Imprimir / PDF</button>
+  </div>
+
+  <!-- Área de texto copiável -->
+  <div id="rel-texto-wrap" style="display:none;margin-bottom:24px;">
+    <div class="table-wrap">
+      <div class="table-header">
+        <h3>📄 Resumo em Texto</h3>
+        <button class="btn btn-primary" onclick="copiarTextoRelatorio()" style="font-size:12px;">📋 Copiar Tudo</button>
+      </div>
+      <textarea id="rel-texto-area" style="width:100%;min-height:400px;background:var(--bg3);border:none;color:var(--text);font-family:Arial,sans-serif;font-size:13px;padding:16px;resize:vertical;outline:none;line-height:1.8;" readonly></textarea>
+    </div>
   </div>
 
   <!-- Cards de resumo -->
@@ -2227,6 +2239,102 @@ function renderRelatorio() {
   }
 }
 
+function toggleTextoRelatorio() {
+  const wrap = document.getElementById('rel-texto-wrap');
+  if(!wrap) return;
+  const visible = wrap.style.display !== 'none';
+  wrap.style.display = visible ? 'none' : 'block';
+  if(!visible) gerarTextoRelatorio();
+}
+
+function gerarTextoRelatorio() {
+  const total = equipamentos.length;
+  const counts = {homologado:0, pendente:0, qa:0, farmacia:0};
+  equipamentos.forEach(e => counts[getStatusEquip(e)]++);
+
+  // Categoria breakdown
+  const cats = {};
+  equipamentos.forEach(e => {
+    if(!cats[e.categoria]) cats[e.categoria] = 0;
+    cats[e.categoria]++;
+  });
+
+  // Fornecedor breakdown
+  const forns = {};
+  equipamentos.forEach(e => {
+    const f = e.fornecedor||'—';
+    if(!forns[f]) forns[f] = 0;
+    forns[f]++;
+  });
+
+  const now = new Date().toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  let txt = '';
+  txt += '================================================\n';
+  txt += '   CONTROLE DE HOMOLOGAÇÃO — RELATÓRIO GERAL   \n';
+  txt += '   Gerado em: ' + now + '\n';
+  txt += '================================================\n\n';
+
+  txt += '📊 RESUMO GERAL\n';
+  txt += '---------------\n';
+  txt += 'Total de Equipamentos: ' + total + '\n';
+  txt += '✅ Homologados:           ' + counts.homologado + ' (' + (total?(counts.homologado/total*100).toFixed(1):0) + '%)\n';
+  txt += '⏳ Pendente Homologação:  ' + counts.pendente + ' (' + (total?(counts.pendente/total*100).toFixed(1):0) + '%)\n';
+  txt += '🔬 Homologação em QA:     ' + counts.qa + ' (' + (total?(counts.qa/total*100).toFixed(1):0) + '%)\n';
+  txt += '💊 Homologação em Farmácia: ' + counts.farmacia + ' (' + (total?(counts.farmacia/total*100).toFixed(1):0) + '%)\n\n';
+
+  txt += '📂 POR CATEGORIA\n';
+  txt += '----------------\n';
+  Object.entries(cats).sort((a,b)=>b[1]-a[1]).forEach(([cat,n]) => {
+    txt += cat.padEnd(30) + n + ' equipamento(s)\n';
+  });
+  txt += '\n';
+
+  txt += '🏭 POR FORNECEDOR\n';
+  txt += '-----------------\n';
+  Object.entries(forns).sort((a,b)=>b[1]-a[1]).forEach(([f,n]) => {
+    txt += f.padEnd(30) + n + ' equipamento(s)\n';
+  });
+  txt += '\n';
+
+  // Farmácia detail
+  const farmItems = equipamentos.filter(e => getStatusEquip(e) === 'farmacia');
+  if(farmItems.length) {
+    txt += '💊 HOMOLOGAÇÃO EM FARMÁCIA\n';
+    txt += '--------------------------\n';
+    farmItems.forEach(e => {
+      txt += '• ' + e.nome + '\n';
+      if(e.raia) txt += '  🏪 Raia — Entrada: ' + fmtData(e.dataRaiaEntrada) + ' | Saída: ' + fmtData(e.dataRaiaSaida) + (e.javaRaia ? ' | Java: ' + (e.javaRaiaNumero||'—') : '') + '\n';
+      if(e.drogasil) txt += '  🏪 Drogasil — Entrada: ' + fmtData(e.dataDrogasilEntrada) + ' | Saída: ' + fmtData(e.dataDrogasilSaida) + (e.javaDrogasil ? ' | Java: ' + (e.javaDrogasilNumero||'—') : '') + '\n';
+    });
+    txt += '\n';
+  }
+
+  txt += '📋 LISTA COMPLETA\n';
+  txt += '-----------------\n';
+  equipamentos.forEach((e,i) => {
+    txt += (i+1) + '. ' + e.nome + '\n';
+    txt += '   Categoria: ' + e.categoria + ' | Fornecedor: ' + (e.fornecedor||'—') + ' | Modelo: ' + (e.modelo||'—') + '\n';
+    if(e.partnum && e.partnum!=='—') txt += '   Part Number: ' + e.partnum + '\n';
+    txt += '   Status: ' + STATUS_NAMES[getStatusEquip(e)] + '\n\n';
+  });
+
+  txt += '================================================\n';
+  txt += 'Fim do relatório\n';
+  txt += '================================================\n';
+
+  const area = document.getElementById('rel-texto-area');
+  if(area) area.value = txt;
+}
+
+function copiarTextoRelatorio() {
+  const area = document.getElementById('rel-texto-area');
+  if(!area) return;
+  area.select();
+  document.execCommand('copy');
+  showToast('📋 Texto copiado!');
+}
+
 function exportRelatorioCSV() {
   const rows = [['#','Equipamento','Categoria','Fornecedor','Modelo','Part Number','Status']];
   equipamentos.forEach((e,i) => rows.push([
@@ -2841,6 +2949,9 @@ window.onload = function() {
   window.renderRelatorio = renderRelatorio;
   window.exportRelatorioCSV = exportRelatorioCSV;
   window.imprimirRelatorio = imprimirRelatorio;
+  window.toggleTextoRelatorio = toggleTextoRelatorio;
+  window.copiarTextoRelatorio = copiarTextoRelatorio;
+  window.gerarTextoRelatorio = gerarTextoRelatorio;
   window.showToast = showToast;
   window.showSyncStatus = showSyncStatus;
   window.renderAba       = renderAba;
