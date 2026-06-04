@@ -1591,9 +1591,7 @@ async function fbLoadAll() {
         if(!equipamentos.find(e=>e.id===eq.id)) equipamentos.push(eq);
       }
     });
-    if(novosEquip.length) {
-      nextId = Math.max(...novosEquip.map(e=>e.id)) + 1;
-    }
+    // nextId não é mais necessário — usando timestamp como ID
 
     // 4. Load images from IMAGES_COLLECTION (overrides imagem field in equip doc)
     const imgs = await fbGetCollection(IMAGES_COLLECTION);
@@ -1995,7 +1993,7 @@ function salvarNovoNaAba(tab) {
   if(!nome || !categoria) { showToast('⚠️ Preencha nome e categoria!'); return; }
 
   const eq = {
-    id: nextId++,
+    id: gerarId(),
     nome,
     modelo: modelo || '—',
     fornecedor: fornecedor || '—',
@@ -2352,6 +2350,11 @@ const STORAGE_KEY = 'homologacao_equipamentos_v1';
 let novosEquip = [];
 let nextId = 100;
 
+function gerarId() {
+  // ID baseado em timestamp — nunca se repete
+  return Date.now();
+}
+
 function loadStorage() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -2403,7 +2406,7 @@ function salvarNovo() {
   console.log('[SN] nome:', nome, 'cat:', categoria);
   if(!nome||!categoria){showToast('⚠️ Preencha nome e categoria!');return;}
   console.log('[SN] validação ok, criando eq');
-  const eq = {id:nextId++, nome, modelo:modelo||'—', fornecedor:fornecedor||'—', categoria, ficha, imagem: n_imgBase64 || null};
+  const eq = {id:gerarId(), nome, modelo:modelo||'—', fornecedor:fornecedor||'—', categoria, ficha, imagem: n_imgBase64 || null};
   console.log('[SN] eq:', eq.id, eq.nome);
   novosEquip.push(eq);
   equipamentos.push(eq);
