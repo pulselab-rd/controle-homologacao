@@ -2393,25 +2393,31 @@ function limparFormNovo() {
 }
 
 function salvarNovo() {
+  console.log('[SN] iniciando');
   const nome = document.getElementById('n_nome').value.trim();
   const modelo = document.getElementById('n_modelo').value.trim();
   const fornecedor = document.getElementById('n_fornecedor').value.trim();
   const partnum = document.getElementById('n_partnum').value.trim();
   const categoria = document.getElementById('n_categoria').value;
   const ficha = document.getElementById('n_ficha').value.trim();
+  console.log('[SN] nome:', nome, 'cat:', categoria);
   if(!nome||!categoria){showToast('⚠️ Preencha nome e categoria!');return;}
+  console.log('[SN] validação ok, criando eq');
   const eq = {id:nextId++, nome, modelo:modelo||'—', fornecedor:fornecedor||'—', categoria, ficha, imagem: n_imgBase64 || null};
+  console.log('[SN] eq:', eq.id, eq.nome);
   novosEquip.push(eq);
   equipamentos.push(eq);
+  console.log('[SN] saveStorage');
   saveStorage();
-  // Save equip without image in main doc, image goes to images collection
+  console.log('[SN] fbSaveEquip');
   const eqSemImagem = Object.assign({}, eq, {imagem: null});
   fbSaveEquip(eqSemImagem);
   if(n_imgBase64) fbSaveImage(eq.id, n_imgBase64);
-  // Salva status conforme destino selecionado
-  const destino = document.getElementById('n_destino').value || 'homologado';
+  console.log('[SN] fbSaveStatus');
+  const destino = document.getElementById('n_destino') ? document.getElementById('n_destino').value || 'homologado' : 'homologado';
   equipStatus[eq.id] = destino;
   fbSaveStatus(eq.id, destino);
+  console.log('[SN] renderizando');
   renderNovos();
   reRenderAll();
   document.getElementById('n_nome').value='';
@@ -2421,8 +2427,10 @@ function salvarNovo() {
   document.getElementById('n_categoria').value='';
   document.getElementById('n_ficha').value='';
   removeImg('n');
+  console.log('[SN] toast');
   showToast('✅ Equipamento salvo!');
   toggleFormNovo();
+  console.log('[SN] concluído');
 }
 
 function renderNovos() {
