@@ -2585,6 +2585,9 @@ function excluirQualquer(id) {
   fbDeleteImage(id);
   fbDelDoc(EDITS_COLLECTION, String(id));
   fbDelDoc(STATUS_FB, String(id));
+  // Remove from equipStatus immediately
+  delete equipStatus[id];
+  delete equipStatus[String(id)];
   renderNovos();
   reRenderAll();
   showToast('🗑 Equipamento removido.');
